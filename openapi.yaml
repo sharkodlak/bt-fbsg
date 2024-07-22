@@ -1,0 +1,252 @@
+openapi: 3.0.3
+
+info:
+  title: HUGmarket
+  version: 1.0.0
+
+tags:
+  - name: To-Do
+
+paths:
+  /api/todos:
+    get:
+      summary: Get To-Do list.
+      operationId: getTodos
+      tags:
+        - To-Do
+      responses:
+        '200':
+          description: To-Do list.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoList'
+              example:
+                - id: 1
+                  title: "Buy milk"
+                  description: "Buy a gallon of milk from the store."
+                  status: "pending"
+                - id: 2
+                  title: "Walk the dog"
+                  description: "Take the dog for a walk around the park."
+                  status: "completed"
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create new To-Do.
+      operationId: createTodo
+      tags:
+        - To-Do
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoWriteDto'
+            example:
+              title: "Sleep"
+              description: "Take a nap."
+              status: "pending"
+        required: true
+      responses:
+        '201':
+          description: To-Do successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedId'
+              example:
+                id: 3
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+
+  /api/todos/{todoId}:
+    parameters:
+      - $ref: '#/components/parameters/todoId'
+    get:
+      summary: Get To-Do.
+      operationId: getTodo
+      tags:
+        - To-Do
+      responses:
+        '200':
+          description: To-Do data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+              example:
+                id: 1
+                title: "Buy milk"
+                description: "Buy a gallon of milk from the store."
+                status: "pending"
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update To-Do.
+      operationId: updateTodo
+      tags:
+        - To-Do
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoWriteDto'
+            example:
+              title: "Buy milk"
+              description: "Buy a gallon of milk from the store."
+              status: "completed"
+        required: true
+      responses:
+        '204':
+          description: To-Do successfully updated.
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete To-Do.
+      operationId: deleteTodo
+      tags:
+        - To-Do
+      responses:
+        '204':
+          description: To-Do successfully deleted.
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '4XX':
+          $ref: '#/components/responses/ClientError'
+        '5XX':
+          $ref: '#/components/responses/Error'
+
+
+components:
+  parameters:
+    todoId:
+      name: todoId
+      description: The To-Do ID.
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/todoId'
+      example: 1
+
+  responses:
+    ClientError:
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "To-Do not found."
+            code: 404
+    Error:
+      description: An error occurred.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Unknown error occurred."
+            code: 500
+    InvalidRequest:
+      description: Validation error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/InvalidRequest"
+          example:
+            error: "Property 'status' is missing."
+            code: 400
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: Associated error code.
+        error:
+          type: string
+          description: A message describing the error.
+      required:
+        - error
+    InvalidRequest:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+
+    CreatedId:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/todoId'
+      required:
+        - id
+      additionalProperties: false
+    Todo:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/todoId'
+          readonly: true
+        title:
+          $ref: '#/components/schemas/title'
+        description:
+          $ref: '#/components/schemas/description'
+        status:
+          $ref: '#/components/schemas/status'
+      additionalProperties: false
+    TodoList:
+      type: object
+      properties:
+        todos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Todo'
+    TodoWriteDto:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/title'
+        description:
+          $ref: '#/components/schemas/description'
+        status:
+          $ref: '#/components/schemas/status'
+      required:
+        - title
+        - description
+        - status
+      additionalProperties: false
+
+    description:
+      type: string
+      description: The To-Do's description.
+    status:
+      type: string
+      description: The To-Do's status.
+      enum:
+        - pending
+        - completed
+    title:
+      type: string
+      description: The To-Do's title.
+    todoId:
+      type: integer
+      description: Unique identifier of the To-Do.
+
+servers:
+    - url: /

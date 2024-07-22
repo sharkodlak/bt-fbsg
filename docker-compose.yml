@@ -1,0 +1,52 @@
+services:
+    nginx:
+        container_name: nginx
+        build:
+            dockerfile: docker/images/nginx/Dockerfile
+            context: .
+        volumes:
+            - ./:/app:cached
+        environment:
+            - NGINX_SERVER_NAME=localhost
+        working_dir: /app
+        ports:
+            - '80:80'
+        links:
+            - php
+
+    php:
+        container_name: php
+        build:
+            dockerfile: docker/images/php/Dockerfile
+            context: .
+            target: development
+        volumes:
+            - ./:/app:cached
+            - ~/.composer:/root/.composer:delegated
+        working_dir: /app
+        links:
+            - db
+
+    db:
+        container_name: db
+        build:
+            dockerfile: docker/images/postgre/Dockerfile
+            context: .
+        volumes:
+            - ./:/app:cached
+            - dbData:/var/lib/postgresql/data
+        working_dir: /app
+        environment:
+            POSTGRES_USER: root
+            POSTGRES_PASSWORD: root
+            GROUP: app
+            MAIN_ROLE: appowner
+            MAIN_ROLE_PASS: appowner
+            DB_NAME: app
+            READONLY_ROLE: readonly
+            READONLY_ROLE_PASSWORD: readonly
+        ports:
+            - '5432:5432'
+
+volumes:
+    dbData:

@@ -1,0 +1,67 @@
+{
+    "name": "sharkodlak/bt-fbsg",
+    "description": "OG Soft test.",
+    "homepage": "http://github.com/sharkodlak/bt-fbsg",
+    "version": "0.1.0",
+    "require": {
+        "php": "^8.3",
+        "ext-json": "*",
+        "aura/sql": "^5.0",
+        "laravel/laravel": "^11.1",
+        "symfony/dotenv": "^7.0"
+    },
+    "require-dev": {
+        "php-parallel-lint/php-parallel-lint": "^1.3",
+        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan-deprecation-rules": "^1.1",
+        "phpstan/phpstan-strict-rules": "^1.5",
+        "phpunit/phpunit": "^11.0",
+        "shipmonk/composer-dependency-analyser": "^1.2",
+        "slevomat/coding-standard": "^8.14",
+        "spaze/phpstan-disallowed-calls": "^3.1",
+        "squizlabs/php_codesniffer": "^3.8"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": false
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Functional\\": "tests/functional/",
+            "Tests\\Integration\\": "tests/integration/",
+            "Tests\\Unit\\": "tests/unit/"
+        }
+    },
+    "scripts": {
+        "cmd:fix": "@cmd:phpcbf",
+        "cmd:lint": "@php vendor/bin/parallel-lint -e php -j 8 src tests",
+        "cmd:phpcs": "@php vendor/bin/phpcs -ps --colors --parallel=8",
+        "cmd:phpcbf": "@php vendor/bin/phpcbf -p --parallel=8",
+        "cmd:phpstan": "@php vendor/bin/phpstan analyse",
+        "cmd:phpstan-baseline": "@cmd:phpstan --generate-baseline",
+        "cmd:phpstan-tests": "@cmd:phpstan tests --configuration app/tests/phpstan.neon",
+        "cmd:require": "@php vendor/bin/composer-dependency-analyser",
+        "cmd:tests": [
+            "@cmd:tests:unit",
+            "@cmd:tests:integration",
+            "@cmd:tests:functional"
+        ],
+        "cmd:tests:unit": "@php vendor/bin/phpunit --testsuite Unit",
+        "cmd:tests:integration": "@php vendor/bin/phpunit --testsuite Integration",
+        "cmd:tests:functional": "@php vendor/bin/phpunit --testsuite Functional",
+        "cmd:qa": [
+            "@cmd:lint",
+            "@cmd:phpcs",
+            "@cmd:phpstan",
+            "@cmd:require",
+            "@cmd:tests"
+        ]
+    }
+}

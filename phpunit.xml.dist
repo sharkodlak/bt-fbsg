@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+	executionOrder="depends,defects"
+	colors="true"
+	failOnRisky="true"
+	failOnWarning="true"
+	cacheDirectory="var/cache/phpunit"
+>
+	<testsuites>
+		<testsuite name="Unit">
+			<directory suffix="Test.php">tests/unit</directory>
+		</testsuite>
+		<testsuite name="Functional">
+			<directory suffix="Test.php">tests/functional</directory>
+		</testsuite>
+	</testsuites>
+	<coverage ignoreDeprecatedCodeUnits="true">
+		<report>
+			<text outputFile="php://stdout" showUncoveredFiles="true" showOnlySummary="true"/>
+		</report>
+	</coverage>
+	<source>
+		<include>
+			<directory suffix=".php">src</directory>
+		</include>
+		<exclude>
+		</exclude>
+	</source>
+</phpunit>
