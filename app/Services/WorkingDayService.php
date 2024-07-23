@@ -16,7 +16,7 @@ class WorkingDayService
 
     public function isWorkingDay(string $state, DateTimeInterface $date)
     {
-        $dayOfWeek = $date->dayOfWeekIso;
+        $dayOfWeek = (int) $date->format('N');
         $daysOff = [ 6, 7 ]; // Saturday and Sunday
         // TODO: Create days-off settings for different countries
 

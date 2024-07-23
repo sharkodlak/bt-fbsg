@@ -19,6 +19,8 @@ class TaskEtaController extends Controller
      */
     public function calculate(Request $request, string $state)
     {
+        self::loadSlidingHolidaysAdapter($this->taskEtaService->getWorkingDayService(), $state);
+
         $validator = Validator::make($request->all(), [
             'start' => 'required|date_format:Y-m-d H:i:s',
             'estimate' => 'required|integer',
@@ -34,6 +36,7 @@ class TaskEtaController extends Controller
         }
 
         $eta = $this->taskEtaService->calculate(
+            $state,
             Carbon::parse($request->start),
             (int) $request->estimate,
             (bool) $request->only_working_days,

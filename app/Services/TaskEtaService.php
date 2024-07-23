@@ -13,11 +13,17 @@ class TaskEtaService {
     private const MINUTES_PER_DAY = 24 * 60;
 
     public function __construct(
-        //private WorkingDayService $workingDayService,
+        private WorkingDayService $workingDayService,
     ) {
     }
 
+    public function getWorkingDayService(): WorkingDayService
+    {
+        return $this->workingDayService;
+    }
+
     public function calculate(
+        string $state,
         DateTimeInterface $start,
         int $estimatedMinutes,
         bool $onlyWorkingDays,
@@ -25,40 +31,39 @@ class TaskEtaService {
         string $workingHoursEnd
     ): DateTimeInterface
     {
+        $remaining = $estimatedMinutes;
         $workingHours = [
             'start' => array_map('intval', explode(':', $workingHoursStart)),
             'end' => array_map('intval', explode(':', $workingHoursEnd)),
         ];
-        $workingTime = (
-                ($workingHours['end'][0] - $workingHours['start'][0]) * 60
-                + $workingHours['end'][1] - $workingHours['start'][1]
-                + self::MINUTES_PER_DAY
-            ) % self::MINUTES_PER_DAY
-        ;
-        $daysAtLeast = (int) floor($estimatedMinutes / $workingTime);
-        $rest = $estimatedMinutes % $workingTime;
-
-        if (!$onlyWorkingDays) {
-            $current = DateTimeImmutable::createFromInterface($start)
-                ->modify('+ ' . $daysAtLeast . ' days');
-        } else {
-            throw new \Exception('Not implemented');
-        }
+        $current = DateTimeImmutable::createFromInterface($start);
+        $dailyWork = [];
 
         if ($current->format('H:i') < $workingHoursStart) {
             $current = $current->setTime(...$workingHours['start']);
         }
 
-        $currentWorkingHoursEnd = $current->setTime(...$workingHours['end']);
-        $diff = $current->diff($currentWorkingHoursEnd);
-        $diffMinutes = $diff->h * 60 + $diff->i;
+        while ($remaining > 0) {
+            $isWorkingDay = !$onlyWorkingDays || $this->workingDayService->isWorkingDay($state, $current);
+            $todayWork = 0;
 
-        $rest -= $diffMinutes;
+            if ($isWorkingDay) {
+                $currentWorkingHoursEnd = $current->setTime(...$workingHours['end']);
+                $diff = $current->diff($currentWorkingHoursEnd);
+                $diffMinutes = $diff->h * 60 + $diff->i;
+                $todayWork = min($diffMinutes, $remaining);
+                $current = $current->modify("+ $todayWork minutes");
+                $remaining -= $diffMinutes;
+            }
 
-        if ($rest > 0) {
+            $dailyWork[$current->format('Y-m-d')] = $todayWork;
+
+            if ($remaining <= 0) {
+                break;
+            }
+
             $current = $current->modify('+ 1 day')
-                ->setTime(...$workingHours['start'])
-                ->modify('+ ' . $rest . ' minutes');
+                ->setTime(...$workingHours['start']);
         }
 
         return $current;
