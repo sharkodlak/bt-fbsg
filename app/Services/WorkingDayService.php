@@ -3,14 +3,20 @@
 namespace App\Services;
 
 use App\Models\Holiday;
-use Carbon\Carbon;
+use DateTimeInterface;
 
 class WorkingDayService
 {
-    public function isWorkingDay($date)
+    private SlidingHolidayAdapter $slidingHolidayAdapter;
+
+    public function injectSlidingHolidayAdapter(SlidingHolidayAdapter $slidingHolidayAdapter)
     {
-        $dateInstance = Carbon::parse($date);
-        $dayOfWeek = $dateInstance->dayOfWeekIso;
+        $this->slidingHolidayAdapter = $slidingHolidayAdapter;
+    }
+
+    public function isWorkingDay(string $state, DateTimeInterface $date)
+    {
+        $dayOfWeek = $date->dayOfWeekIso;
         $daysOff = [ 6, 7 ]; // Saturday and Sunday
         // TODO: Create days-off settings for different countries
 
@@ -18,9 +24,14 @@ class WorkingDayService
             return false;
         }
 
-        $month = $dateInstance->format('m');
-        $day = $dateInstance->format('d');
-        $holiday = Holiday::where('month', $month)
+        if ($this->slidingHolidayAdapter->isHoliday($date)) {
+            return false;
+        }
+
+        $month = $date->format('m');
+        $day = $date->format('d');
+        $holiday = Holiday::where('state', $state)
+            ->where('month', $month)
             ->where('day', $day)
             ->first();
 

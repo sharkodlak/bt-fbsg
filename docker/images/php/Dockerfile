@@ -22,7 +22,7 @@ RUN sed -i '/^# cs_CZ.UTF-8 /s/^# //' /etc/locale.gen && \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN docker-php-ext-install pdo_pgsql
+RUN docker-php-ext-install calendar pdo_pgsql
 
 EXPOSE 9000
 
