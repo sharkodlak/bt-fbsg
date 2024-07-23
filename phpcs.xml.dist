@@ -6,7 +6,7 @@
     <arg name="severity" value="1"/>
     <arg name="cache" value="var/cache/phpcs"/>
 
-    <file>src</file>
+    <file>app</file>
     <file>tests</file>
 
     <rule ref="ruleset.xml"></rule>

@@ -110,7 +110,7 @@
 	<rule ref="vendor/slevomat/coding-standard/SlevomatCodingStandard/ruleset.xml">
 		<properties>
 			<property name="rootNamespaces" type="array">
-				<element key="src" value="App"/>
+				<element key="app" value="App"/>
 				<element key="tests/functional" value="Tests\Functional"/>
 				<element key="tests/integration" value="Tests\Integration"/>
 				<element key="tests/unit" value="Tests\Unit"/>
