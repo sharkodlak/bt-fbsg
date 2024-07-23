@@ -35,7 +35,7 @@ class TaskEtaController extends Controller
             ], 422);
         }
 
-        $eta = $this->taskEtaService->calculate(
+        $etaDto = $this->taskEtaService->calculate(
             $state,
             Carbon::parse($request->start),
             (int) $request->estimate,
@@ -45,7 +45,8 @@ class TaskEtaController extends Controller
         );
 
         return response()->json([
-            'ETA' => $eta->format('Y-m-d H:i:s'),
+            'ETA' => $etaDto->getDate()->format('Y-m-d H:i:s'),
+            'daily_work' => $etaDto->getDailyWork(),
         ]);
     }
 }

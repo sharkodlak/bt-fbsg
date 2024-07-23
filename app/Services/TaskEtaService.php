@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Dto\EtaDto;
 use DateInterval;
 use DateTime;
 use DateTimeImmutable;
@@ -29,7 +30,7 @@ class TaskEtaService {
         bool $onlyWorkingDays,
         string $workingHoursStart,
         string $workingHoursEnd
-    ): DateTimeInterface
+    ): EtaDto
     {
         $remaining = $estimatedMinutes;
         $workingHours = [
@@ -40,32 +41,32 @@ class TaskEtaService {
         $dailyWork = [];
 
         if ($current->format('H:i') < $workingHoursStart) {
+            $dailyWork[$current->format('Y-m-d')] = 0;
             $current = $current->setTime(...$workingHours['start']);
         }
 
-        while ($remaining > 0) {
+        while (true) {
             $isWorkingDay = !$onlyWorkingDays || $this->workingDayService->isWorkingDay($state, $current);
-            $todayWork = 0;
+            $dailyWork[$current->format('Y-m-d')] = 0;
 
-            if ($isWorkingDay) {
+            if ($isWorkingDay && $current->format('H:i') <= $workingHoursEnd) {
                 $currentWorkingHoursEnd = $current->setTime(...$workingHours['end']);
                 $diff = $current->diff($currentWorkingHoursEnd);
                 $diffMinutes = $diff->h * 60 + $diff->i;
                 $todayWork = min($diffMinutes, $remaining);
                 $current = $current->modify("+ $todayWork minutes");
+                $dailyWork[$current->format('Y-m-d')] = $todayWork;
                 $remaining -= $diffMinutes;
-            }
 
-            $dailyWork[$current->format('Y-m-d')] = $todayWork;
-
-            if ($remaining <= 0) {
-                break;
+                if ($remaining <= 0) {
+                    break;
+                }
             }
 
             $current = $current->modify('+ 1 day')
                 ->setTime(...$workingHours['start']);
         }
 
-        return $current;
+        return new EtaDto($current, $dailyWork);
     }
 }
