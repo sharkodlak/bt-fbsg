@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Dto\EtaDto;
-use DateInterval;
-use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 
 class TaskEtaService {
-    private const MINUTES_PER_DAY = 24 * 60;
-
     public function __construct(
         private WorkingDayService $workingDayService,
     ) {
